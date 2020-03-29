@@ -19,6 +19,8 @@ import {
   shouldUpdateHeatMap,
   LATITUDE_DELTA,
   LONGITUDE_DELTA,
+  HEATMAP_WEB_RADIUS,
+  HEATMAP_WEB_OPACITY,
   HEATMAP_GET_DATA_DISTANCE,
   DEFAULT_LOCATION,
 } from './mapConfig';
@@ -130,8 +132,12 @@ export default function Map({ navigation }) {
         showsMyLocationButton={false}
         onMapReady={() => setMapReady(true)}
       >
-        {heatmapData.mapData ? (
-          <Heatmap points={heatmapData.mapData}></Heatmap>
+        {heatmapData.mapData && heatmapData.mapData.length > 0 ? (
+          <Heatmap
+            points={heatmapData.mapData}
+            radius={HEATMAP_WEB_RADIUS / 1.5}
+            opacity={HEATMAP_WEB_OPACITY}
+          />
         ) : null}
       </MapView>
 
