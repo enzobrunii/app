@@ -72,6 +72,15 @@ export default function Map({ navigation }) {
   const mapRef = useRef<MapView>();
   const refRBSheet = useRef();
 
+  // const [coords, setCoords] = useState(
+  //   location
+  //     ? {
+  //         latitude: location.coords.latitude,
+  //         longitude: location.coords.longitude,
+  //       }
+  //     : DEFAULT_LOCATION,
+  // );
+
   useEffect(() => {
     if (location) {
       const locationCoords = {
@@ -96,6 +105,10 @@ export default function Map({ navigation }) {
               lastUpdated: now,
               center: locationCoords,
             };
+            // setCoords({
+            //   latitude: location.coords.latitude,
+            //   longitude: location.coords.longitude,
+            // });
             setHeatmapData(heatmapData);
           })
           .catch(error => {
@@ -122,6 +135,7 @@ export default function Map({ navigation }) {
             : undefined
         }
         initialCamera={{
+          // center: coords,
           center: location ? location.coords : DEFAULT_LOCATION,
           pitch: 1,
           heading: 1,
@@ -135,7 +149,7 @@ export default function Map({ navigation }) {
         {heatmapData.mapData && heatmapData.mapData.length > 0 ? (
           <Heatmap
             points={heatmapData.mapData}
-            radius={HEATMAP_WEB_RADIUS / 1.5}
+            radius={HEATMAP_WEB_RADIUS / 3}
             opacity={HEATMAP_WEB_OPACITY}
           />
         ) : null}

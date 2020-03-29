@@ -31,12 +31,15 @@ const heatmapInitialValues = {
 export default function Map({ navigation }) {
   const [heatmapData, setHeatmapData] = useState(heatmapInitialValues);
   const { location } = useLocation();
-  const coords = location
-    ? {
-        lat: location.coords.latitude,
-        lng: location.coords.longitude,
-      }
-    : DEFAULT_LOCATION_WEB;
+
+  const [coords, setCoords] = useState(
+    location
+      ? {
+          lat: location.coords.latitude,
+          lng: location.coords.longitude,
+        }
+      : DEFAULT_LOCATION_WEB,
+  );
 
   useEffect(() => {
     if (location) {
@@ -64,6 +67,8 @@ export default function Map({ navigation }) {
               lastUpdated: now,
               center: locationCoords,
             };
+
+            setCoords(locationCoords);
             setHeatmapData(heatmapData);
           })
           .catch(error => {

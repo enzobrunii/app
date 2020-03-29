@@ -99,7 +99,7 @@ export async function saveLocationLocally(location) {
           'INSERT INTO locations (location, created_at) values (?, strftime("%s","now"))',
           [JSON.stringify(location)],
           (tx, result) => {
-            console.log('Location saved!');
+            // console.log('Location saved!');
             resolve(true);
           },
           (tx, error) => {

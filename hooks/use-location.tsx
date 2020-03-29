@@ -26,7 +26,6 @@ if (!TaskManager.isTaskDefined(LOCATION_TASK_NAME)) {
   });
 }
 
-
 export const useLocation = (
   {
     runInBackground,
@@ -83,7 +82,7 @@ export const useLocation = (
 
   useEffect(() => {
     function onLocationUpdate(location) {
-      console.log('onLocationUpdate -> location', location);
+      // console.log('onLocationUpdate -> location', location);
       saveLocationLocally(location);
     }
 
