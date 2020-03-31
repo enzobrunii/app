@@ -17,6 +17,7 @@ import Colors from '../../constants/Colors';
 import { savePreferences } from '../../utils/config';
 import RadioButtons from '../../components/RadioButtons';
 import DatePicker from '../../components/DatePicker';
+import { syncUserInfoDataWithServer } from '../../utils/syncStorageHelper';
 
 import SearchableDropdown from 'react-native-searchable-dropdown';
 import { provinces } from '../../utils/data';
@@ -54,6 +55,8 @@ const UserInfo = ({ navigation }: MainStackNavProps<'UserInfo'>) => {
   }
   async function handleContinue() {
     await savePreferences({ userInfo: state });
+    syncUserInfoDataWithServer();
+
     navigation.navigate('Main');
   }
 

@@ -1,6 +1,21 @@
 import { axiosInstance } from './axiosInstance';
 
-import { recordsRoute, locationsRoute, heatMapRoute } from './routes';
+import {
+  userInfoRoute,
+  recordsRoute,
+  locationsRoute,
+  heatMapRoute,
+} from './routes';
+
+/**
+ * Send user info.
+ * https://apitester.com/shared/checks/e90f115a0899400ebad5adf7b6a8fe89
+ *
+ * @param reqData user information.
+ */
+export const postUserInfo = reqData => {
+  return axiosInstance.post(userInfoRoute, reqData);
+};
 
 /**
  * Send recorded diagnostics.
