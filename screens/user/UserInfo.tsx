@@ -3,10 +3,12 @@ import {
   View,
   Text,
   TextInput,
+  TouchableWithoutFeedback,
   StyleSheet,
   Platform,
   Image,
   KeyboardAvoidingView,
+  Keyboard
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TextInputMask } from 'react-native-masked-text';
@@ -62,112 +64,114 @@ const UserInfo = ({ navigation }: MainStackNavProps<'UserInfo'>) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{ flex: 1, padding: 20, alignItems: 'center' }}>
-        <Image
-          source={require('../../assets/images/logo.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={{ flex: 1, justifyContent: 'flex-start' }}
-        >
-          <Text style={styles.text}>
-            Necesitamos algunos datos tuyos para poder realizar un diagnóstico
-            más preciso y contactarte si necesitas ayuda.
-          </Text>
-          <SearchableDropdown
-            onTextChange={text => console.log(text)}
-            //On text change listner on the searchable input
-            // onItemSelect={item => alert(JSON.stringify(item))}
-            onItemSelect={handleChange('province')}
-            //onItemSelect called after the selection from the dropdown
-            containerStyle={{ marginTop: 20, padding: 0 }}
-            //suggestion container style
-            textInputStyle={{
-              //inserted text style
-              padding: 10,
-              borderWidth: 1,
-            }}
-            itemStyle={{
-              //single dropdown item style
-              padding: 10,
-              marginTop: 2,
-              backgroundColor: '#FAF9F8',
-              borderColor: '#bbb',
-              borderWidth: 1,
-            }}
-            itemTextStyle={{
-              //single dropdown item's text style
-              color: '#222',
-            }}
-            itemsContainerStyle={
-              {
-                //items container style you can pass maxHeight
-                //to restrict the items dropdown hieght
-                // maxHeight: '30vw',
-              }
-            }
-            items={provinces}
-            //mapping of item array
-            // defaultIndex={2}
-            //default selected item index
-            placeholder="Provincia"
-            //place holder for the search input
-            resetValue={false}
-            //reset textInput Value with true and false state
-            underlineColorAndroid="transparent"
-            //To remove the underline from the android input
+      <TouchableWithoutFeedback onPress={Platform.OS !== 'web' && Keyboard.dismiss}>
+        <View style={{ flex: 1, padding: 20, alignItems: 'center' }}>
+          <Image
+            source={require('../../assets/images/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
           />
-
-          <TextInput
-            placeholder="# Celular"
-            value={state.phoneNumber}
-            onChangeText={handleChange('phoneNumber')}
-            keyboardType="phone-pad"
-            style={styles.input}
-            blurOnSubmit
-          />
-          <RadioButtons
-            label="Sexo"
-            options={[
-              {
-                key: 'M',
-                text: 'Masculino',
-              },
-              {
-                key: 'F',
-                text: 'Femenino',
-              },
-            ]}
-            onChange={handleChange('gender')}
-          />
-          <DatePicker
-            label="Fecha de Nacimiento"
-            onChange={handleChange('dob')}
-          />
-          <Touchable
-            enabled={canSave}
-            style={[
-              styles.button,
-              styles.activeButton,
-              { width: undefined, margin: 10 },
-              !canSave && { backgroundColor: '#ccc' },
-            ]}
-            onPress={handleContinue}
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            style={{ flex: 1, justifyContent: 'flex-start' }}
           >
-            <Text style={[styles.buttonText, styles.activeButtonText]}>
-              Continuar
+            <Text style={styles.text}>
+              Necesitamos algunos datos tuyos para poder realizar un diagnóstico
+              más preciso y contactarte si necesitas ayuda.
             </Text>
-          </Touchable>
-          <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-            <Text style={styles.footerText}>
-              Gestionamos tu información de forma segura y para uso exclusivo
-              oficial.
-            </Text>
-          </View>
-        </KeyboardAvoidingView>
-      </View>
+            <SearchableDropdown
+              onTextChange={text => console.log(text)}
+              //On text change listner on the searchable input
+              // onItemSelect={item => alert(JSON.stringify(item))}
+              onItemSelect={handleChange('province')}
+              //onItemSelect called after the selection from the dropdown
+              containerStyle={{ marginTop: 20, padding: 0 }}
+              //suggestion container style
+              textInputStyle={{
+                //inserted text style
+                padding: 10,
+                borderWidth: 1,
+              }}
+              itemStyle={{
+                //single dropdown item style
+                padding: 10,
+                marginTop: 2,
+                backgroundColor: '#FAF9F8',
+                borderColor: '#bbb',
+                borderWidth: 1,
+              }}
+              itemTextStyle={{
+                //single dropdown item's text style
+                color: '#222',
+              }}
+              itemsContainerStyle={
+                {
+                  //items container style you can pass maxHeight
+                  //to restrict the items dropdown hieght
+                  // maxHeight: '30vw',
+                }
+              }
+              items={provinces}
+              //mapping of item array
+              // defaultIndex={2}
+              //default selected item index
+              placeholder="Provincia"
+              //place holder for the search input
+              resetValue={false}
+              //reset textInput Value with true and false state
+              underlineColorAndroid="transparent"
+              //To remove the underline from the android input
+            />
+
+            <TextInput
+              placeholder="# Celular"
+              value={state.phoneNumber}
+              onChangeText={handleChange('phoneNumber')}
+              keyboardType="phone-pad"
+              style={styles.input}
+              blurOnSubmit
+            />
+            <RadioButtons
+              label="Sexo"
+              options={[
+                {
+                  key: 'M',
+                  text: 'Masculino',
+                },
+                {
+                  key: 'F',
+                  text: 'Femenino',
+                },
+              ]}
+              onChange={handleChange('gender')}
+            />
+            <DatePicker
+              label="Fecha de Nacimiento"
+              onChange={handleChange('dob')}
+            />
+            <Touchable
+              enabled={canSave}
+              style={[
+                styles.button,
+                styles.activeButton,
+                { width: undefined, margin: 10 },
+                !canSave && { backgroundColor: '#ccc' },
+              ]}
+              onPress={handleContinue}
+            >
+              <Text style={[styles.buttonText, styles.activeButtonText]}>
+                Continuar
+              </Text>
+            </Touchable>
+            <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+              <Text style={styles.footerText}>
+                Gestionamos tu información de forma segura y para uso exclusivo
+                oficial.
+              </Text>
+            </View>
+          </KeyboardAvoidingView>
+        </View>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 };
