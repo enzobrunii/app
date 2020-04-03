@@ -155,7 +155,11 @@ function Questionary({ onShowResults }: QuestionaryProps) {
     }
 
     if (state.symptoms['fever'] === 'yes' && positiveTravelContact) {
-      if (state.symptoms['cough'] === 'yes' || state.symptoms['throat'] === 'yes') {
+      if (
+        state.symptoms['cough'] === 'yes' ||
+        state.symptoms['throat'] === 'yes' ||
+        state.symptoms['breath'] === 'yes'
+      ) {
         if (state.symptoms['breath'] === 'yes') {
           result = 'negative';
         } else {
