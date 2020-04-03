@@ -1,11 +1,13 @@
 import React, { useReducer, useRef, useEffect, useState } from 'react';
 import {
+  Linking,
   View,
   Text,
   TextInput,
   StyleSheet,
   Platform,
   Image,
+  CheckBox,
   KeyboardAvoidingView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -34,11 +36,16 @@ const UserInfo = ({ navigation }: MainStackNavProps<'UserInfo'>) => {
     setState({ [key]: value });
   };
 
+  const handlePressTyC = () => {
+    Linking.openURL('https://cotrack.social/tyc.html');
+  };
+
   useEffect(() => {
     if (
       (state.phoneNumber || '') !== '' &&
       (state.gender || '') !== '' &&
       (state.province || '') !== '' &&
+      (state.terms || '') !== '' &&
       isValidDate()
     ) {
       setCanSave(true);
@@ -146,6 +153,28 @@ const UserInfo = ({ navigation }: MainStackNavProps<'UserInfo'>) => {
             label="Fecha de Nacimiento"
             onChange={handleChange('dob')}
           />
+          <Text>
+            Para comenzar a utilizar CoTrack, primero debes aceptar los{' '}
+            <Text
+              onPress={handlePressTyC}
+              style={{
+                color: Colors.primaryColor,
+                textDecorationLine: 'underline',
+              }}
+            >
+              Términos y Condiciones
+            </Text>
+          </Text>
+          <View style={{ flexDirection: 'row', marginTop: 20 }}>
+            <CheckBox
+              value={state.terms}
+              onValueChange={handleChange('terms')}
+            />
+            <Text style={{ marginTop: 0, marginBottom: 20 }}>
+              {' '}
+              He leído y acepto los términos y condiciones
+            </Text>
+          </View>
           <Touchable
             enabled={canSave}
             style={[
