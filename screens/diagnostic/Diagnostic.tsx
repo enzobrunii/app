@@ -1,6 +1,7 @@
 import React, { useReducer, useCallback, useEffect, useState } from 'react';
 import {
   StyleSheet,
+  TextInput,
   Text,
   View,
   Platform,
@@ -12,14 +13,17 @@ import * as Location from 'expo-location';
 
 import { QuestResults } from './types';
 import Colors from '../../constants/Colors';
+import { formatAge } from '../../utils/forms';
 import Touchable from '../../components/Touchable';
 import { saveDiagnosticLocally } from '../../utils/localStorageHelper';
 import { syncRecordsDataWithServer } from '../../utils/syncStorageHelper';
 
 
 const initialState = {
+  age: '',
   symptoms: {},
   questions: {},
+  medicalHistory: {}
 };
 
 function reducer(state, newState) {
@@ -90,6 +94,8 @@ interface QuestionaryProps {
 function Questionary({ onShowResults }: QuestionaryProps) {
   const [state, setState] = useReducer(reducer, initialState);
   const [disabled, setDisabled] = useState(true);
+  const [positiveTravelContact, setPositiveTravelContact] = useState(false);
+  const [positiveExtraConditions, setpositiveExtraConditions] = useState(false);
 
   const onSelectSymptoms = useCallback(
     id => {
@@ -102,18 +108,34 @@ function Questionary({ onShowResults }: QuestionaryProps) {
     [state.symptoms],
   );
 
+  const onSelectMedicalHistory= useCallback(
+    id => {
+      const newSelected = {
+        ...state.medicalHistory,
+        [id]: state.medicalHistory[id] === 'yes' ? 'no' : 'yes',
+      };
+      setState({ medicalHistory: newSelected });
+    },
+    [state.medicalHistory],
+  );
+
+  const handleChangeAge = age => {
+    setState({ age: formatAge(age) });
+  };
+
   useEffect(() => {
-    const hasSymptoms = Object.keys(state.symptoms).find(
-      k => state.symptoms[k] === 'yes',
-    );
-    const hasAnswers =
-      Object.keys(state.questions).filter(k => k !== 'pathology').length >= 5;
-    // if (!!hasSymptoms && !!hasAnswers) {
-    if (!!hasAnswers) {
-      setDisabled(false);
-    } else {
-      setDisabled(true);
-    }
+    const hasAnswers = Object.keys(state.questions);
+    const hasPositiveAnswers = hasAnswers.filter(
+      k => state.questions[k] === 'yes',
+    ).length >= 1;
+    const hasPositiveConditions = Object.keys(state.medicalHistory).filter(
+      k => state.medicalHistory[k] === 'yes',
+    ).length >= 1;
+
+    setDisabled(!(hasAnswers.length >= 3));
+    setPositiveTravelContact(!!hasPositiveAnswers);
+    setpositiveExtraConditions(!!hasPositiveConditions);
+
   }, [state]);
 
   const handleShowResults = result => {
@@ -123,27 +145,28 @@ function Questionary({ onShowResults }: QuestionaryProps) {
 
   const handlePress = async () => {
     let result: QuestResults;
+
     function hasExtraConditions() {
-      if (
-        state.questions['elder'] === 'yes' ||
-        state.questions['pregnant'] === 'yes' ||
-        state.questions['pathology'] === 'yes'
-      ) {
+      if ((parseInt(state.age) >= 60) || positiveExtraConditions) {
         result = 'negative';
       } else {
         result = 'neutral';
       }
     }
-    if (
-      state.symptoms['fever'] === 'yes' &&
-      (state.questions['travel'] === 'yes' ||
-        state.questions['confirmedContact'] === 'yes' ||
-        state.questions['suspectedContact'] === 'yes')
-    ) {
-      if (state.symptoms['breath']) {
-        result = 'negative';
+
+    if (state.symptoms['fever'] === 'yes' && positiveTravelContact) {
+      if (
+        state.symptoms['cough'] === 'yes' ||
+        state.symptoms['throat'] === 'yes' ||
+        state.symptoms['breath'] === 'yes'
+      ) {
+        if (state.symptoms['breath'] === 'yes') {
+          result = 'negative';
+        } else {
+          hasExtraConditions();
+        }
       } else {
-        hasExtraConditions();
+        result = 'positive';
       }
     } else {
       result = 'positive';
@@ -187,6 +210,15 @@ function Questionary({ onShowResults }: QuestionaryProps) {
           respondiendo una serie de preguntas, detallando los síntomas que estás
           teniendo y si creés haber estado en contacto con alguien infectado.
         </Text>
+        <Text style={styles.section}>Edad</Text>
+        <TextInput
+          placeholder="¿Cual es tu edad?"
+          value={state.age}
+          onChangeText={handleChangeAge}
+          keyboardType="phone-pad"
+          style={styles.input}
+          blurOnSubmit
+        />
         <Text style={styles.section}>Dolencias y síntomas</Text>
         <View style={styles.questButtons}>
           <QuestButton
@@ -232,20 +264,9 @@ function Questionary({ onShowResults }: QuestionaryProps) {
             selected={state.symptoms}
           />
         </View>
-        <Text style={styles.section}>Contacto cercano</Text>
+        <Text style={styles.section}>Viajes o contactos confirmados</Text>
         <Text style={styles.subtitle}>
-          ¿Volviste de viaje de algún país con algún caso confirmado de
-          coronavirus?
-        </Text>
-        <View style={styles.questButtons}>
-          <YesNoButtons
-            id="travel"
-            onPress={handleYesNoPress}
-            state={state.questions}
-          />
-        </View>
-        <Text style={styles.subtitle}>
-          ¿Tuviste contacto estrecho con alguien con diagnóstico confirmado?
+          ¿Estuviste en contacto con algún caso confirmado de Coronavirus, en los ultimos 14 días?
         </Text>
         <View style={styles.questButtons}>
           <YesNoButtons
@@ -255,46 +276,80 @@ function Questionary({ onShowResults }: QuestionaryProps) {
           />
         </View>
         <Text style={styles.subtitle}>
-          ¿Conviviste con alguien que sea caso sospechoso o confirmado?
+          ¿Estuviste de viaje fuera del país, en los ultimos 14 días?
         </Text>
         <View style={styles.questButtons}>
           <YesNoButtons
-            id="suspectedContact"
-            onPress={handleYesNoPress}
-            state={state.questions}
-          />
-        </View>
-        <Text style={styles.section}>Situación actual y antecedentes</Text>
-        <Text style={styles.subtitle}>¿Tenés 60 años o más?</Text>
-        <View style={styles.questButtons}>
-          <YesNoButtons
-            id="elder"
+            id="suspectedOutside"
             onPress={handleYesNoPress}
             state={state.questions}
           />
         </View>
         <Text style={styles.subtitle}>
-          ¿Estás embarazada o en contacto con un recién nacido?
+          ¿Estuviste en alguna Provincia con casos locales de Coronavirus, en los ultimos 14 días?
         </Text>
         <View style={styles.questButtons}>
           <YesNoButtons
+            id="suspectedInside"
+            onPress={handleYesNoPress}
+            state={state.questions}
+          />
+        </View>
+        <Text style={styles.section}>Antecedentes medicos</Text>
+        <View style={styles.questButtons}>
+          <QuestButton
+            id="immunosuppression"
+            text="Inmunosupresión"
+            onPress={onSelectMedicalHistory}
+            selected={state.medicalHistory}
+          />
+          <QuestButton
+            id="diabetes"
+            text="Diabetes"
+            onPress={onSelectMedicalHistory}
+            selected={state.medicalHistory}
+          />
+          <QuestButton
+            id="cancer"
+            text="Cáncer"
+            onPress={onSelectMedicalHistory}
+            selected={state.medicalHistory}
+          />
+          <QuestButton
+            id="hepatic"
+            text="Enfermedad hepática"
+            onPress={onSelectMedicalHistory}
+            selected={state.medicalHistory}
+          />
+          <QuestButton
             id="pregnant"
-            onPress={handleYesNoPress}
-            state={state.questions}
+            text="Embarazo"
+            onPress={onSelectMedicalHistory}
+            selected={state.medicalHistory}
           />
-        </View>
-        <Text style={styles.subtitle}>
-          ¿Sufrís alguna de las siguientes patologías?{`\n\n`} - Cáncer
-          {`\n`} - Colesterol alto {`\n`} - Diabetes {`\n`} - Enfermedades
-          cardiovasculares {`\n`} - Enfermedades respiratorias {`\n`} -
-          Esclerosis múltiple
-          {`\n`} - Hipertensión arterial {`\n`} - Hipo o hipertiroidismo
-        </Text>
-        <View style={styles.questButtons}>
-          <YesNoButtons
-            id="pathology"
-            onPress={handleYesNoPress}
-            state={state.questions}
+          <QuestButton
+            id="newborn"
+            text="Recién nacido con síntomas"
+            onPress={onSelectMedicalHistory}
+            selected={state.medicalHistory}
+          />
+          <QuestButton
+            id="respiratoryDisease"
+            text="Enfermedad respiratoria (Asma, EPOC)"
+            onPress={onSelectMedicalHistory}
+            selected={state.medicalHistory}
+          />
+          <QuestButton
+            id="kidneyDisease"
+            text="Enfermedad Renal Crónica"
+            onPress={onSelectMedicalHistory}
+            selected={state.medicalHistory}
+          />
+          <QuestButton
+            id="cardiologicalDisease"
+            text="Enfermedad cardiológica (HTA)"
+            onPress={onSelectMedicalHistory}
+            selected={state.medicalHistory}
           />
         </View>
       </ScrollView>
@@ -352,6 +407,36 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   subtitle: { paddingTop: 20, paddingBottom: 10 },
+  input: {
+    backgroundColor: 'white',
+    marginVertical: 10,
+    padding: 15,
+    borderColor: 'white',
+    borderRadius: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 1,
+        },
+        shadowOpacity: 0.22,
+        shadowRadius: 2.22,
+      },
+      android: {
+        elevation: 3,
+      },
+      web: {
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 1,
+        },
+        shadowOpacity: 0.22,
+        shadowRadius: 2.22,
+      },
+    }),
+  },
   button: {
     flexDirection: 'row',
     minHeight: 50,
