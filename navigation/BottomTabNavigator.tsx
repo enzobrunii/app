@@ -89,7 +89,7 @@ function PreventionNavStack() {
         name="PreventionDetail"
         component={PreventionDetail}
         options={{ headerTitle: '' }}
-        sharedElementsConfig={route => {
+        sharedElementsConfig={(route) => {
           const { item } = route.params;
           return [{ id: item.id }];
         }}
@@ -120,7 +120,7 @@ function DiagnosticNavStack() {
       <DiagnosticStack.Screen
         name="Diagnostic"
         options={{
-          headerTitle: 'Auto Diagnóstico',
+          headerTitle: 'Auto Evaluación',
           headerRight: () => <HelpButton />,
         }}
         component={Diagnostic}
@@ -144,7 +144,7 @@ export default function BottomTabNavigator() {
         name="Diagnostic"
         component={DiagnosticNavStack}
         options={{
-          title: 'Diagnóstico',
+          title: 'Evaluación',
           tabBarIcon: ({ focused }) => (
             <TabBarIcon
               focused={focused}

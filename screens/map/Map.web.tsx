@@ -46,7 +46,7 @@ export default function Map({ navigation }) {
 
   const [zoom, setZoom] = useState(HEATMAP_WEB_ZOOM);
 
-  const [isVisibleModalSocial, setIsVisibleModalSocial] = useState(false);
+  const [isVisibleModalSocial, setIsVisibleModalSocial] = useState(true);
 
   useEffect(() => {
     if (location) {
@@ -59,7 +59,7 @@ export default function Map({ navigation }) {
           ...locationCoords,
           distance: HEATMAP_GET_DATA_DISTANCE,
         })
-          .then(response => {
+          .then((response) => {
             const positions = response.data;
             const mapData = {
               positions: positions,
@@ -79,7 +79,7 @@ export default function Map({ navigation }) {
             setCoords(locationCoords);
             setHeatmapData(heatmapData);
           })
-          .catch(error => {
+          .catch((error) => {
             console.log(error);
           });
 
@@ -87,7 +87,7 @@ export default function Map({ navigation }) {
           ...locationCoords,
           distance: HEATMAP_GET_DATA_DISTANCE,
         })
-          .then(response => {
+          .then((response) => {
             const positions = response.data;
             const mapData = {
               positions: positions,
@@ -106,7 +106,7 @@ export default function Map({ navigation }) {
 
             setHeatmapDataAux(heatmapData);
           })
-          .catch(error => {
+          .catch((error) => {
             console.log(error);
           });
       }
@@ -160,15 +160,14 @@ export default function Map({ navigation }) {
             { backgroundColor: heatmapData.isSocial ? 'green' : 'gray' },
           ]}
           onPress={() => {
-            !heatmapData.isSocial && setIsVisibleModalSocial(true);
-
             setHeatmapData(heatmapInitialValues);
 
             setTimeout(() => {
               const aux = heatmapData;
               setHeatmapData(heatmapDataAux);
               setHeatmapDataAux(aux);
-            }, 500);
+              setIsVisibleModalSocial(true);
+            }, 100);
           }}
         >
           <Icon
@@ -207,7 +206,10 @@ export default function Map({ navigation }) {
       <GoogleMapReact
         ref={mapRef}
         bootstrapURLKeys={{
-          key: `${Constants.manifest.extra.googleMapsWebApiKey}`,
+          key: `${
+            process.env.REACT_NATIVE_GOOGLE_API_KEY ||
+            Constants.manifest.extra.googleMapsWebApiKey
+          }`,
         }}
         center={coords}
         zoom={zoom}
@@ -229,15 +231,18 @@ export default function Map({ navigation }) {
         swipeDirection="left"
       >
         <View style={mapStyles.modalContent}>
-          <Text style={mapStyles.modalTitle}>Datos Comunitarios</Text>
+          <Text style={mapStyles.modalTitle}>
+            Datos {heatmapData.isSocial ? 'Comunitarios' : 'Oficiales'}
+          </Text>
           <Text
             style={[
               mapStyles.modalBody,
               { textAlign: 'center', borderWidth: 0 },
             ]}
           >
-            Los datos que estarás viendo ahora son datos reportados
-            voluntariamente. No son datos oficiales!
+            {heatmapData.isSocial
+              ? 'Los datos que estás viendo ahora son datos reportados colaborativamente. No son casos confirmados, sino aquellos que presentan síntomas compatibles y no fueron aun testeados.'
+              : 'Los datos que estarás viendo son datos reportados oficialmente. Las zonas de calor no indican puntos exactos de ubicación de contagiados.'}
           </Text>
 
           <TouchableOpacity onPress={() => setIsVisibleModalSocial(false)}>

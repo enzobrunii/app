@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "CoTrack",
-    "description": "Autodiagnósticos, focos de infección, prevención, contactos centros de salud.",
+    "description": "Autoevaluaciones, focos de infección, prevención, contactos centros de salud.",
     "slug": "cotrack-app",
     "privacy": "public",
     "sdkVersion": "36.0.0",

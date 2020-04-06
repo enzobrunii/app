@@ -38,9 +38,19 @@ export const provinces = [
 
   { id: 12, name: 'La Rioja', tel: '107', extra: '911' },
 
-  { id: 13, name: 'Mendoza', tel: '0800 800 26843' },
+  {
+    id: 13,
+    name: 'Mendoza',
+    tel: '0800 800 26843',
+    image: require('../assets/images/provinces/Mendoza_province_COA.png'),
+  },
 
-  { id: 14, name: 'Misiones', tel: '0800 444 3400' },
+  {
+    id: 14,
+    name: 'Misiones',
+    tel: '0800 444 3400',
+    image: require('../assets/images/provinces/Esc_mis.jpg'),
+  },
 
   { id: 15, name: 'Neuquén', tel: '0800 333 1002' },
 
@@ -56,7 +66,12 @@ export const provinces = [
 
   { id: 21, name: 'Santa Fe', tel: '0800 555 6549' },
 
-  { id: 22, name: 'Santiago del Estero', tel: '0800 8886737' },
+  {
+    id: 22,
+    name: 'Santiago del Estero',
+    tel: '0800 8886737',
+    image: require('../assets/images/provinces/Escudo_de_la_Provincia_de_Santiago_del_Estero.png'),
+  },
 
   {
     id: 23,

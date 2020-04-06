@@ -67,9 +67,9 @@ const data: PreventionItem[] = [
     id: '7',
     title: '¿Cuándo hacer cuarentena?',
     shortText:
-      'A las personas que ingresan al país que hayan permanecido en zonas con transmisión del nuevo coronavirus se recomienda permanecer en el domicilio y no concurrir a lugares públicos.',
+      'Hasta el día 12/04 la cuarentena es obligatoria para todos, salvo actividades exceptuadas.',
     longText:
-      'A las personas que ingresan al país que hayan permanecido en zonas con transmisión del nuevo coronavirus se recomienda permanecer en el domicilio y no concurrir a lugares públicos.\nEl gobierno dispuso medidas para que la gente evite agruparse en ámbitos laborales, recreativos, deportivos y sociales durante 14 días.',
+      'Hasta el día 12/04 la cuarentena es obligatoria para todos, salvo actividades exceptuadas.\nPara aquellas personas exceptuadas, se recomienda mantener el distanciamiento social y extremar medidas de higiene.',
     image: require('../../assets/images/prevention/quarantine.png'),
   },
 ];
@@ -115,7 +115,7 @@ export default function Prevention({
         data={data}
         contentContainerStyle={{ justifyContent: 'center' }}
         renderItem={renderItem}
-        keyExtractor={i => i.id}
+        keyExtractor={(i) => i.id}
         numColumns={2}
         showsVerticalScrollIndicator={false}
       />

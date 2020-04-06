@@ -42,14 +42,14 @@ function PositiveResults() {
       </RectButton>
       <Text style={styles.cardText}>
         Si tus síntomas fueron cambiando, por favor volvé a realizar el
-        autodiagnóstico y seguí las recomendaciones dadas.
+        autoevaluación y seguí las recomendaciones dadas.
       </Text>
       <RectButton
         style={[styles.button, styles.activeButton, { width: '80%' }]}
         onPress={() => navigation.goBack()}
       >
         <Text style={[styles.buttonText, styles.activeButtonText]}>
-          Realizar diagnóstico nuevamente
+          Realizar evaluación nuevamente
         </Text>
       </RectButton>
     </>
@@ -82,14 +82,14 @@ function NeutralResults() {
       </RectButton>
       <Text style={styles.cardText}>
         Si tus síntomas fueron cambiando, por favor volvé a realizar el
-        autodiagnóstico y seguí las recomendaciones dadas.
+        autoevaluación y seguí las recomendaciones dadas.
       </Text>
       <RectButton
         style={[styles.button, styles.activeButton, { width: '80%' }]}
         onPress={() => navigation.goBack()}
       >
         <Text style={[styles.buttonText, styles.activeButtonText]}>
-          Realizar diagnóstico nuevamente
+          Realizar evaluación nuevamente
         </Text>
       </RectButton>
     </>
@@ -181,14 +181,14 @@ function NegativeResults({ province }) {
 
       <Text style={styles.cardText}>
         Si tus síntomas fueron cambiando, por favor volvé a realizar el
-        autodiagnóstico y seguí las recomendaciones dadas.
+        autoevaluación y seguí las recomendaciones dadas.
       </Text>
       <RectButton
         style={[styles.button, styles.activeButton, { width: '80%' }]}
         onPress={() => navigation.goBack()}
       >
         <Text style={[styles.buttonText, styles.activeButtonText]}>
-          Realizar diagnóstico nuevamente
+          Realizar evaluación nuevamente
         </Text>
       </RectButton>
     </>
@@ -211,14 +211,14 @@ function NegativeResults({ province }) {
 //         </Text>
 //       </RectButton>
 //       <Text style={styles.cardSubTitle}>
-//         {`Si tus síntomas fueron cambiando, por favor volvé a realizar el autodiagnóstico y seguí las recomendaciones dadas.`}
+//         {`Si tus síntomas fueron cambiando, por favor volvé a realizar el autoevaluación y seguí las recomendaciones dadas.`}
 //       </Text>
 //       <RectButton
 //         style={[styles.button, styles.activeButton, { width: '80%' }]}
 //         onPress={() => navigation.goBack()}
 //       >
 //         <Text style={[styles.buttonText, styles.activeButtonText]}>
-//           Realizar diagnóstico nuevamente
+//           Realizar evaluación nuevamente
 //         </Text>
 //       </RectButton>
 //     </>
