@@ -6,22 +6,15 @@ import {
 
 import BottomTabNavigator from './BottomTabNavigator';
 import { OnboardingSlides } from '../screens/onboaring/OnboardingSlides';
+import { Splash } from '../screens/onboaring/Splash';
 import UserInfo from '../screens/user/UserInfo';
 import { MainStackParamList } from './types';
 import { UserPreferences } from '../utils/config';
 
 const Stack = createStackNavigator<MainStackParamList>();
 
-export default function MainNavigator({
-  showOnboarding,
-  userInfo,
-}: UserPreferences) {
-  const initialRouteName = showOnboarding
-    ? 'Help'
-    : userInfo && userInfo.province
-    ? 'Main'
-    : 'UserInfo';
-
+export default function MainNavigator() {
+  // ({ userInfo }: UserPreferences) {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -31,10 +24,11 @@ export default function MainNavigator({
       }}
       mode="modal"
       headerMode="none"
-      initialRouteName={initialRouteName}
+      initialRouteName="Splash"
     >
-      <Stack.Screen name="Main" component={BottomTabNavigator} />
+      <Stack.Screen name="Splash" component={Splash} />
       <Stack.Screen name="Help" component={OnboardingSlides} />
+      <Stack.Screen name="Main" component={BottomTabNavigator} />
       <Stack.Screen name="UserInfo" component={UserInfo} />
     </Stack.Navigator>
   );

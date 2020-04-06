@@ -2,12 +2,9 @@ import React, { useState } from 'react';
 import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 import Colors from '../constants/Colors';
 
-export default function RadioButtons({ options, label, onChange }) {
-  const [value, setValue] = useState();
-
-  function handlePress(value) {
-    setValue(value);
-    onChange(value);
+export default function RadioButtons({ options, label, onChange, value }) {
+  function handlePress(val) {
+    onChange(val);
   }
 
   return (

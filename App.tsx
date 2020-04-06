@@ -1,28 +1,26 @@
 import * as React from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+
 import { SplashScreen } from 'expo';
 import { Asset } from 'expo-asset';
 import * as Font from 'expo-font';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { NavigationContainer } from '@react-navigation/native';
 import { syncLocalDataWithServer } from './utils/syncStorageHelper';
 import { initAndUpdateDatabase } from './utils/localStorageHelper';
 
-
 import useLinking from './navigation/useLinking';
-import {
-  getPreferences,
-  UserPreferences,
-} from './utils/config';
+import { getPreferences, UserPreferences } from './utils/config';
 import MainNavigator from './navigation/MainNavigator';
 import Layout from './constants/Layout';
 
 export default function App(props) {
-  const [isLoadingComplete, setLoadingComplete] = React.useState(false);
+  // const [isLoadingComplete, setLoadingComplete] = React.useState(false);
   // const [showOnboarding, setShowOnboarding] = React.useState(true);
-  const [preferences, setPreferences] = React.useState<
-    UserPreferences | undefined
-  >();
+  // const [preferences, setPreferences] = React.useState<
+  //   UserPreferences | undefined
+  // >();
   const [initialNavigationState, setInitialNavigationState] = React.useState<
     any
   >();
@@ -40,7 +38,7 @@ export default function App(props) {
 
         // Load fonts
         await Font.loadAsync({
-          ...Ionicons.font,
+          // ...Ionicons.font,
           'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
         });
 
@@ -65,12 +63,28 @@ export default function App(props) {
 
         // await clearPreferences();
         const preferences = await getPreferences();
-        setPreferences(preferences);
+        // setPreferences(preferences);
+
+        const userInfo = preferences.userInfo;
+        const initialRoute = preferences.showOnboarding
+          ? 'Help'
+          : userInfo &&
+            userInfo.acceptedTerms === Constants.manifest.extra.termsVersion
+          ? 'Main'
+          : 'UserInfo';
+
+        // containerRef.current?.navigate(initialRoute);
+
+        containerRef.current?.reset({
+          index: 0,
+          routes: [{ name: initialRoute }],
+        });
       } catch (e) {
         // We might want to provide this error information to an error reporting service
         console.warn(e);
       } finally {
-        setLoadingComplete(true);
+        // setLoadingComplete(true);
+
         SplashScreen.hide();
       }
     }
@@ -79,23 +93,20 @@ export default function App(props) {
     syncLocalDataWithServer();
   }, []);
 
-  if (!isLoadingComplete && !props.skipLoadingScreen) {
-    return null;
-  } else {
-    return (
-      <View style={styles.container}>
-        {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+  return (
+    <View style={styles.container}>
+      {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
 
-        <NavigationContainer
-          ref={containerRef}
-          initialState={initialNavigationState}
-        >
-          <MainNavigator {...preferences} />
-        </NavigationContainer>
-      </View>
-    );
-  }
+      <NavigationContainer
+        ref={containerRef}
+        initialState={initialNavigationState}
+      >
+        <MainNavigator />
+      </NavigationContainer>
+    </View>
+  );
 }
+// }
 
 const styles = StyleSheet.create({
   container: {

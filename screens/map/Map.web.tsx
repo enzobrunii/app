@@ -1,14 +1,25 @@
 /* global google */
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Button } from 'react-native';
+import {
+  Platform,
+  View,
+  StyleSheet,
+  Text,
+  SafeAreaView,
+  TouchableOpacity,
+} from 'react-native';
+import { Ionicons as Icon } from '@expo/vector-icons';
 import GoogleMapReact from 'google-map-react';
-import { getHeatmapData } from '../../api/services';
+import Modal from 'modal-enhanced-react-native-web';
 
+import { getHeatmapData, getHeatmapSocialData } from '../../api/services';
 import { useLocation } from '../../hooks/use-location';
 import Constants from 'expo-constants';
+import Colors from '../../constants/Colors';
 
 import {
   shouldUpdateHeatMap,
+  heatmapInitialValues,
   HEATMAP_WEB_ZOOM,
   HEATMAP_WEB_RADIUS,
   HEATMAP_WEB_OPACITY,
@@ -16,20 +27,12 @@ import {
   DEFAULT_LOCATION_WEB,
 } from './mapConfig';
 
-const heatmapInitialValues = {
-  mapData: {
-    positions: [],
-    options: {
-      radius: HEATMAP_WEB_RADIUS,
-      opacity: HEATMAP_WEB_OPACITY,
-    },
-  },
-  lastUpdated: undefined,
-  center: undefined,
-};
+import { mapStyles } from './mapStyles';
 
 export default function Map({ navigation }) {
   const [heatmapData, setHeatmapData] = useState(heatmapInitialValues);
+  const [heatmapDataAux, setHeatmapDataAux] = useState(heatmapInitialValues);
+
   const { location } = useLocation();
 
   const [coords, setCoords] = useState(
@@ -40,6 +43,10 @@ export default function Map({ navigation }) {
         }
       : DEFAULT_LOCATION_WEB,
   );
+
+  const [zoom, setZoom] = useState(HEATMAP_WEB_ZOOM);
+
+  const [isVisibleModalSocial, setIsVisibleModalSocial] = useState(false);
 
   useEffect(() => {
     if (location) {
@@ -66,10 +73,38 @@ export default function Map({ navigation }) {
               mapData: mapData,
               lastUpdated: now,
               center: locationCoords,
+              isSocial: false,
             };
 
             setCoords(locationCoords);
             setHeatmapData(heatmapData);
+          })
+          .catch(error => {
+            console.log(error);
+          });
+
+        getHeatmapSocialData({
+          ...locationCoords,
+          distance: HEATMAP_GET_DATA_DISTANCE,
+        })
+          .then(response => {
+            const positions = response.data;
+            const mapData = {
+              positions: positions,
+              options: {
+                radius: HEATMAP_WEB_RADIUS,
+                opacity: HEATMAP_WEB_OPACITY,
+              },
+            };
+            const now = new Date().getTime();
+            const heatmapData = {
+              mapData: mapData,
+              lastUpdated: now,
+              center: locationCoords,
+              isSocial: true,
+            };
+
+            setHeatmapDataAux(heatmapData);
           })
           .catch(error => {
             console.log(error);
@@ -92,14 +127,91 @@ export default function Map({ navigation }) {
     ></div>
   );
 
+  const webStyles = StyleSheet.create({
+    buttonContainerWeb: {
+      ...mapStyles.buttonContainer,
+      position: 'absolute',
+      zIndex: 9999,
+      right: 0,
+    },
+  });
+
+  const mapRef = useRef<GoogleMapReact>();
+
   return (
-    <View style={{ height: '100vh', width: '100%' }}>
+    <View style={[mapStyles.container]}>
+      <SafeAreaView style={webStyles.buttonContainerWeb}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={[mapStyles.button, mapStyles.locationButton]}
+          onPress={() => navigation.navigate({ name: 'Help', key: 'help-map' })}
+        >
+          <Icon
+            name={`${Platform.OS === 'ios' ? 'ios' : 'md'}-help-circle-outline`}
+            size={24}
+            color="rgba(66,135,244,1)"
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={[
+            mapStyles.button,
+            mapStyles.layerButton,
+            { backgroundColor: heatmapData.isSocial ? 'green' : 'gray' },
+          ]}
+          onPress={() => {
+            !heatmapData.isSocial && setIsVisibleModalSocial(true);
+
+            setHeatmapData(heatmapInitialValues);
+
+            setTimeout(() => {
+              const aux = heatmapData;
+              setHeatmapData(heatmapDataAux);
+              setHeatmapDataAux(aux);
+            }, 500);
+          }}
+        >
+          <Icon
+            name={`${Platform.OS === 'ios' ? 'ios' : 'md'}-people`}
+            size={24}
+            color="white"
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={[mapStyles.button, mapStyles.infoButton]}
+          disabled={!location}
+          onPress={() => {
+            setZoom(-1);
+
+            const bounds = new mapRef.current.maps_.LatLngBounds();
+            var latLng = new mapRef.current.maps_.LatLng(
+              location.coords.latitude,
+              location.coords.longitude,
+            );
+            bounds.extend(latLng);
+
+            mapRef.current.map_.fitBounds(bounds);
+            setTimeout(() => {
+              setZoom(HEATMAP_WEB_ZOOM);
+            }, 10);
+          }}
+        >
+          <Icon
+            name={`${Platform.OS === 'ios' ? 'ios' : 'md'}-locate`}
+            size={24}
+            color={!location ? Colors.tabIconDefault : 'rgba(66, 135, 244, 1)'}
+          />
+        </TouchableOpacity>
+      </SafeAreaView>
       <GoogleMapReact
+        ref={mapRef}
         bootstrapURLKeys={{
           key: `${Constants.manifest.extra.googleMapsWebApiKey}`,
         }}
         center={coords}
-        zoom={HEATMAP_WEB_ZOOM}
+        zoom={zoom}
+        defaultZoom={HEATMAP_WEB_ZOOM}
         heatmapLibrary={true}
         heatmap={heatmapData.mapData}
         options={{ fullscreenControl: false, zoomControl: false }}
@@ -111,6 +223,30 @@ export default function Map({ navigation }) {
           />
         ) : null}
       </GoogleMapReact>
+      <Modal
+        isVisible={isVisibleModalSocial}
+        onSwipe={() => setIsVisibleModalSocial(false)}
+        swipeDirection="left"
+      >
+        <View style={mapStyles.modalContent}>
+          <Text style={mapStyles.modalTitle}>Datos Comunitarios</Text>
+          <Text
+            style={[
+              mapStyles.modalBody,
+              { textAlign: 'center', borderWidth: 0 },
+            ]}
+          >
+            Los datos que estarás viendo ahora son datos reportados
+            voluntariamente. No son datos oficiales!
+          </Text>
+
+          <TouchableOpacity onPress={() => setIsVisibleModalSocial(false)}>
+            <View style={mapStyles.modalButton}>
+              <Text style={{ color: 'white' }}>Aceptar</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }

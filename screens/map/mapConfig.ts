@@ -79,3 +79,16 @@ export const HEATMAP_HARDCODED_DATA_WEB = {
     opacity: HEATMAP_WEB_OPACITY,
   },
 };
+
+export const heatmapInitialValues = {
+  mapData: {
+    positions: [],
+    options: {
+      radius: HEATMAP_WEB_RADIUS,
+      opacity: HEATMAP_WEB_OPACITY,
+    },
+  },
+  lastUpdated: undefined,
+  center: undefined,
+  isSocial: false,
+};

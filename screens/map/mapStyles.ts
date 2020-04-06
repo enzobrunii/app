@@ -1,6 +1,5 @@
 import { StyleSheet } from 'react-native';
 
-
 export const panelStyles = StyleSheet.create({
   panel: {
     padding: 20,
@@ -51,7 +50,6 @@ export const panelStyles = StyleSheet.create({
   },
 });
 
-
 export const mapStyles = StyleSheet.create({
   container: {
     flex: 1,
@@ -79,6 +77,12 @@ export const mapStyles = StyleSheet.create({
     borderTopEndRadius: 15,
     borderTopStartRadius: 15,
   },
+  layerButton: {
+    marginTop: 0,
+    marginBottom: StyleSheet.hairlineWidth,
+    borderTopEndRadius: 0,
+    borderTopStartRadius: 0,
+  },
   infoButton: {
     borderBottomEndRadius: 15,
     borderBottomStartRadius: 15,
@@ -87,6 +91,57 @@ export const mapStyles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'flex-end',
     alignItems: 'flex-end',
+  },
+  modalContent: {
+    width: '90%',
+    marginHorizontal: 'auto',
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+    padding: 0,
+    borderRadius: 8,
+  },
+  modalTitle: {
+    backgroundColor: 'rgba(66, 135, 244, 1)',
+    color: 'rgb(255, 255, 255)',
+    width: '100%',
+    textAlign: 'center',
+    lineHeight: 35,
+    borderTopEndRadius: 6,
+    borderTopStartRadius: 6,
+    borderBottomEndRadius: 0,
+    borderBottomStartRadius: 0,
+  },
+  modalBody: {
+    backgroundColor: 'rgb(255, 255, 255)',
+    padding: 10,
+    borderTopWidth: 0,
+    borderBottomWidth: 0,
+    borderRightWidth: 1,
+    borderRightColor: 'black',
+    borderLeftWidth: 1,
+    borderLeftColor: 'black',
+  },
+  modalButtonContainer: {
+    backgroundColor: 'white',
+    borderTopWidth: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: 'black',
+    borderRightWidth: 1,
+    borderRightColor: 'black',
+    borderLeftWidth: 1,
+    borderLeftColor: 'black',
+  },
+  modalButton: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(66, 135, 244, 1)',
+    paddingVertical: 12,
+    marginHorizontal: 10,
+    paddingHorizontal: 12,
+    margin: 10,
+    minWidth: 50,
+    borderRadius: 10,
   },
 });
 

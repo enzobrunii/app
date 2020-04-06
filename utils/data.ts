@@ -60,7 +60,7 @@ export const provinces = [
 
   {
     id: 23,
-    name: 'Tierra del Fuego, Antártida e Islas del Atlántico Sur',
+    name: 'Tierra del Fuego',
     tel: '107',
   },
 

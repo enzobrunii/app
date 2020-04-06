@@ -2,15 +2,28 @@ import React, { useState } from 'react';
 import { Text, View, Picker, StyleSheet } from 'react-native';
 import Colors from '../constants/Colors';
 
-export default function DatePicker({ label, onChange }) {
+export default function DatePicker({ label, onChange, value }) {
   // const dobRef = useRef<any | undefined>();
 
-  const [value, setValue] = useState({});
+  let defaultValue = {};
+
+  if (value) {
+    const v = value.split('/');
+    defaultValue = {
+      dobDay: v[0],
+      dobMonth: v[1],
+      dobYear: v[2],
+    };
+  }
+
+  const [internalValue, setInternalValue] = useState(defaultValue);
 
   const handleChange = key => val => {
-    value[key] = val;
-    setValue(value);
-    onChange(`${value.dobDay}/${value.dobMonth}/${value.dobYear}`);
+    internalValue[key] = val;
+    setInternalValue(internalValue);
+    onChange(
+      `${internalValue.dobDay}/${internalValue.dobMonth}/${internalValue.dobYear}`,
+    );
   };
 
   const arrDays = Array.from(Array(31).keys()).map((e, i) => (
@@ -69,7 +82,7 @@ export default function DatePicker({ label, onChange }) {
           )} */}
         <Picker
           // id="day"
-          selectedValue={value.dobDay}
+          selectedValue={internalValue.dobDay}
           onValueChange={handleChange('dobDay')}
           style={{ width: '30%' }}
           mode="dropdown"
@@ -79,7 +92,7 @@ export default function DatePicker({ label, onChange }) {
         </Picker>
         <Picker
           // id="month"
-          selectedValue={value.dobMonth}
+          selectedValue={internalValue.dobMonth}
           onValueChange={handleChange('dobMonth')}
           style={{ width: '30%' }}
           mode="dropdown"
@@ -89,7 +102,7 @@ export default function DatePicker({ label, onChange }) {
         </Picker>
         <Picker
           // id="year"
-          selectedValue={value.dobYear}
+          selectedValue={internalValue.dobYear}
           onValueChange={handleChange('dobYear')}
           style={{ width: '30%' }}
           mode="dropdown"
@@ -107,7 +120,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 15,
     marginTop: 15,
   },
 

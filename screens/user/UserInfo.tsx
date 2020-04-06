@@ -2,6 +2,7 @@ import React, { useReducer, useRef, useEffect, useState } from 'react';
 import {
   Linking,
   View,
+  ScrollView,
   Text,
   TextInput,
   StyleSheet,
@@ -9,20 +10,22 @@ import {
   Image,
   CheckBox,
   KeyboardAvoidingView,
+  Modal,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { TextInputMask } from 'react-native-masked-text';
+import Constants from 'expo-constants';
 import moment from 'moment';
 import { MainStackNavProps } from '../../navigation/types';
 import Touchable from '../../components/Touchable';
 import Colors from '../../constants/Colors';
-import { savePreferences } from '../../utils/config';
+import { savePreferences, getPreferences } from '../../utils/config';
 import RadioButtons from '../../components/RadioButtons';
 import DatePicker from '../../components/DatePicker';
+import ProvincePicker from '../../components/ProvincePicker';
 import { syncUserInfoDataWithServer } from '../../utils/syncStorageHelper';
 
-import SearchableDropdown from 'react-native-searchable-dropdown';
-import { provinces } from '../../utils/data';
+import { mapStyles } from '../map/mapStyles';
 
 function reducer(state, newState) {
   return { ...state, ...newState };
@@ -31,20 +34,45 @@ function reducer(state, newState) {
 const UserInfo = ({ navigation }: MainStackNavProps<'UserInfo'>) => {
   const [state, setState] = useReducer(reducer, {});
   const [canSave, setCanSave] = useState(false);
+  const [isVisibleModalDni, setIsVisibleModalDni] = useState(false);
+
+  const [selectedProvince, setSelectedProvince] = useState(0);
+
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    async function loadData() {
+      const preferences = await getPreferences();
+      if (preferences.userInfo) {
+        preferences.userInfo.terms = false;
+        preferences.userInfo.province &&
+          setSelectedProvince(preferences.userInfo.province.id);
+      }
+      setState(preferences.userInfo);
+      setLoaded(true);
+    }
+    loadData();
+  }, []);
 
   const handleChange = key => value => {
     setState({ [key]: value });
   };
 
-  const handlePressTyC = () => {
-    Linking.openURL('https://cotrack.social/tyc.html');
+  const handleOpenLink = url => {
+    if (Platform.OS === 'web') {
+      window.open(url, '_blank');
+    } else {
+      Linking.openURL(url);
+    }
   };
 
   useEffect(() => {
     if (
       (state.phoneNumber || '') !== '' &&
+      (state.email || '') !== '' &&
       (state.gender || '') !== '' &&
       (state.province || '') !== '' &&
+      (state.dni || '') !== '' &&
       (state.terms || '') !== '' &&
       isValidDate()
     ) {
@@ -61,142 +89,239 @@ const UserInfo = ({ navigation }: MainStackNavProps<'UserInfo'>) => {
     return moment(state.dob, 'D/M/YYYY', true).isValid();
   }
   async function handleContinue() {
+    state.acceptedTerms = Constants.manifest.extra.termsVersion;
     await savePreferences({ userInfo: state });
     syncUserInfoDataWithServer();
-
     navigation.navigate('Main');
   }
 
+  if (!loaded) return null;
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{ flex: 1, padding: 20, alignItems: 'center' }}>
-        <Image
-          source={require('../../assets/images/logo.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={{ flex: 1, justifyContent: 'flex-start' }}
+      <ScrollView keyboardShouldPersistTaps="handled">
+        <View
+          style={{
+            marginTop: 22,
+            position: 'absolute',
+            top: '20%',
+            zIndex: 99999,
+            display:
+              Platform.OS === 'web' && !isVisibleModalDni ? 'none' : null,
+          }}
         >
-          <Text style={styles.text}>
-            Necesitamos algunos datos tuyos para poder realizar un diagnóstico
-            más preciso y contactarte si necesitas ayuda.
-          </Text>
-          <SearchableDropdown
-            onTextChange={text => console.log(text)}
-            //On text change listner on the searchable input
-            // onItemSelect={item => alert(JSON.stringify(item))}
-            onItemSelect={handleChange('province')}
-            //onItemSelect called after the selection from the dropdown
-            containerStyle={{ marginTop: 20, padding: 0 }}
-            //suggestion container style
-            textInputStyle={{
-              //inserted text style
-              padding: 10,
-              borderWidth: 1,
-            }}
-            itemStyle={{
-              //single dropdown item style
-              padding: 10,
-              marginTop: 2,
-              backgroundColor: '#FAF9F8',
-              borderColor: '#bbb',
-              borderWidth: 1,
-            }}
-            itemTextStyle={{
-              //single dropdown item's text style
-              color: '#222',
-            }}
-            itemsContainerStyle={
-              {
-                //items container style you can pass maxHeight
-                //to restrict the items dropdown hieght
-                // maxHeight: '30vw',
-              }
-            }
-            items={provinces}
-            //mapping of item array
-            // defaultIndex={2}
-            //default selected item index
-            placeholder="Provincia"
-            //place holder for the search input
-            resetValue={false}
-            //reset textInput Value with true and false state
-            underlineColorAndroid="transparent"
-            //To remove the underline from the android input
+          <Modal
+            animationType="slide"
+            transparent={true}
+            presentationStyle="overFullScreen"
+            visible={isVisibleModalDni}
+            style={Platform.OS === 'web' ? { borderWidth: 0 } : undefined}
+          >
+            <View
+              style={{ marginTop: 15, width: '90%', marginHorizontal: '5%' }}
+            >
+              <Text style={mapStyles.modalTitle}>
+                ¿Por qué pedimos estos datos?
+              </Text>
+              <View style={[mapStyles.modalBody]}>
+                <Text style={{ textAlign: 'left' }}>
+                  La información que generamos entre todos sobre nuestros
+                  síntomas es utilizada por las autoridades nacionales y
+                  provinciales para predecir y monitorear brotes de COVID-19.
+                  {'\n\n'}
+                  En caso de ser necesario por tus síntomas o a criterio de
+                  gobierno, deben poder contactarte para coordinar que te
+                  realices un test. {'\n\n'}
+                  Tu información GPS se almacena en tu telefono y solamente se
+                  comparte si vos lo decidís.{'\n\n'}
+                  <Text style={{ marginTop: 15 }}>
+                    Te pedimos leas los{' '}
+                    <Text
+                      onPress={() =>
+                        handleOpenLink('https://cotrack.social/tyc.html')
+                      }
+                      style={{
+                        color: Colors.primaryColor,
+                        textDecorationLine: 'underline',
+                        marginTop: 15,
+                      }}
+                    >
+                      Términos y Condiciones de Uso
+                    </Text>{' '}
+                    y las{' '}
+                    <Text
+                      onPress={() =>
+                        handleOpenLink('https://cotrack.social/faq.html')
+                      }
+                      style={{
+                        color: Colors.primaryColor,
+                        textDecorationLine: 'underline',
+                        marginTop: 15,
+                      }}
+                    >
+                      Preguntas Frecuentes
+                    </Text>{' '}
+                    disponibles en{' '}
+                    <Text
+                      onPress={() => handleOpenLink('https://cotrack.social/')}
+                      style={{
+                        color: Colors.primaryColor,
+                        textDecorationLine: 'underline',
+                        marginTop: 15,
+                      }}
+                    >
+                      https://cotrack.social/
+                    </Text>{' '}
+                    para más detalle
+                  </Text>
+                </Text>
+              </View>
+              <View style={mapStyles.modalButtonContainer}>
+                <TouchableOpacity onPress={() => setIsVisibleModalDni(false)}>
+                  <View style={mapStyles.modalButton}>
+                    <Text style={{ color: 'white' }}>Aceptar</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        </View>
+        <View
+          style={{
+            flex: 1,
+            padding: 20,
+            alignItems: 'center',
+          }}
+        >
+          <Image
+            source={require('../../assets/images/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
           />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+            style={{
+              flex: 1,
+              justifyContent: 'flex-start',
+            }}
+          >
+            <Text style={styles.text}>
+              Necesitamos algunos datos tuyos para poder realizar un diagnóstico
+              más preciso y contactarte si necesitas ayuda.
+            </Text>
 
-          <TextInput
-            placeholder="# Celular"
-            value={state.phoneNumber}
-            onChangeText={handleChange('phoneNumber')}
-            keyboardType="phone-pad"
-            style={styles.input}
-            blurOnSubmit
-          />
-          <RadioButtons
-            label="Sexo"
-            options={[
-              {
-                key: 'M',
-                text: 'Masculino',
-              },
-              {
-                key: 'F',
-                text: 'Femenino',
-              },
-            ]}
-            onChange={handleChange('gender')}
-          />
-          <DatePicker
-            label="Fecha de Nacimiento"
-            onChange={handleChange('dob')}
-          />
-          <Text>
-            Para comenzar a utilizar CoTrack, primero debes aceptar los{' '}
+            <ProvincePicker
+              label="Provincia"
+              onChange={handleChange('province')}
+              value={state.province}
+            />
+
+            <TextInput
+              placeholder="DNI"
+              value={state.dni}
+              onChangeText={handleChange('dni')}
+              keyboardType="phone-pad"
+              style={styles.input}
+              blurOnSubmit
+            />
+            <View style={[styles.input, { borderWidth: 0 }]}>
+              <RadioButtons
+                label="Sexo"
+                options={[
+                  {
+                    key: 'M',
+                    text: 'Masculino',
+                  },
+                  {
+                    key: 'F',
+                    text: 'Femenino',
+                  },
+                ]}
+                value={state.gender}
+                onChange={handleChange('gender')}
+              />
+            </View>
+
+            <DatePicker
+              label="Fecha de Nacimiento"
+              onChange={handleChange('dob')}
+              value={state.dob}
+            />
+
+            <TextInput
+              placeholder="Email"
+              value={state.email}
+              onChangeText={handleChange('email')}
+              keyboardType="email-address"
+              style={styles.input}
+              blurOnSubmit
+            />
+
+            <TextInput
+              placeholder="# Celular"
+              value={state.phoneNumber}
+              onChangeText={handleChange('phoneNumber')}
+              keyboardType="phone-pad"
+              style={styles.input}
+              blurOnSubmit
+            />
+
             <Text
-              onPress={handlePressTyC}
+              onPress={() => setIsVisibleModalDni(true)}
               style={{
                 color: Colors.primaryColor,
                 textDecorationLine: 'underline',
+                marginTop: 15,
               }}
             >
-              Términos y Condiciones
+              ¿Por qué pedimos estos datos?
             </Text>
-          </Text>
-          <View style={{ flexDirection: 'row', marginTop: 20 }}>
-            <CheckBox
-              value={state.terms}
-              onValueChange={handleChange('terms')}
-            />
-            <Text style={{ marginTop: 0, marginBottom: 20 }}>
-              {' '}
-              He leído y acepto los términos y condiciones
-            </Text>
-          </View>
-          <Touchable
-            enabled={canSave}
-            style={[
-              styles.button,
-              styles.activeButton,
-              { width: undefined, margin: 10 },
-              !canSave && { backgroundColor: '#ccc' },
-            ]}
-            onPress={handleContinue}
-          >
-            <Text style={[styles.buttonText, styles.activeButtonText]}>
-              Continuar
-            </Text>
-          </Touchable>
-          <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-            <Text style={styles.footerText}>
-              Gestionamos tu información de forma segura y para uso exclusivo
-              oficial.
-            </Text>
-          </View>
-        </KeyboardAvoidingView>
-      </View>
+
+            <View style={{ flexDirection: 'row', marginTop: 20 }}>
+              <CheckBox
+                value={state.terms}
+                onValueChange={handleChange('terms')}
+              />
+              <Text style={{ marginTop: 0, marginBottom: 20 }}>
+                {' '}
+                He leído y acepto los{' '}
+                <Text
+                  onPress={() =>
+                    handleOpenLink('https://cotrack.social/tyc.html')
+                  }
+                  style={{
+                    color: Colors.primaryColor,
+                    textDecorationLine: 'underline',
+                    marginTop: 15,
+                  }}
+                >
+                  términos y condiciones
+                </Text>
+              </Text>
+            </View>
+            <Touchable
+              enabled={canSave}
+              style={[
+                styles.button,
+                styles.activeButton,
+                { width: undefined, margin: 10 },
+                !canSave && { backgroundColor: '#ccc' },
+              ]}
+              onPress={handleContinue}
+            >
+              <Text style={[styles.buttonText, styles.activeButtonText]}>
+                Continuar
+              </Text>
+            </Touchable>
+            <View style={{ flex: 1, justifyContent: 'flex-start' }}>
+              <Text style={styles.footerText}>
+                Gestionamos tu información de forma segura y para uso exclusivo
+                oficial.
+              </Text>
+            </View>
+          </KeyboardAvoidingView>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -206,10 +331,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     backgroundColor: '#fff',
+    overflow: 'scroll',
+    maxHeight: '100%',
   },
   logo: {
     width: 150,
-    height: 150,
+    height: 100,
   },
   text: {
     fontSize: 14,
@@ -221,7 +348,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   input: {
-    marginVertical: 20,
+    marginTop: 20,
     padding: 10,
     borderWidth: StyleSheet.hairlineWidth,
   },

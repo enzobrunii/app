@@ -5,6 +5,7 @@ import {
   recordsRoute,
   locationsRoute,
   heatMapRoute,
+  heatMapSocialRoute,
 } from './routes';
 
 /**
@@ -46,6 +47,17 @@ export const postLocations = reqData => {
 export const getHeatmapData = reqData => {
   // return mockGetHeatmapData(reqData);
   return axiosInstance.post(heatMapRoute, reqData);
+};
+
+/**
+ * Get heatmap social for a given location.
+ *
+ *
+ * @param reqData Current user location.
+ */
+export const getHeatmapSocialData = reqData => {
+  // return mockGetHeatmapData(reqData);
+  return axiosInstance.post(heatMapSocialRoute, reqData);
 };
 
 /**

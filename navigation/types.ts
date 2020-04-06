@@ -5,6 +5,7 @@ export type MainStackParamList = {
   Main: undefined;
   Help: undefined;
   UserInfo: undefined;
+  Splash: undefined;
 };
 export type MainStackNavProps<T extends keyof MainStackParamList> = {
   navigation: StackNavigationProp<MainStackParamList, T>;

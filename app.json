@@ -45,7 +45,8 @@
       }
     },
     "extra": {
-      "googleMapsWebApiKey": "<GOOGLE_API_KEY>"
+      "googleMapsWebApiKey": "<GOOGLE_API_KEY>",
+      "termsVersion": "0"
     }
   }
 }
