@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { Platform, StatusBar, StyleSheet, View, Text, TextInput } from 'react-native';
 
 import { SplashScreen } from 'expo';
 import { Asset } from 'expo-asset';
@@ -16,6 +16,13 @@ import MainNavigator from './navigation/MainNavigator';
 import Layout from './constants/Layout';
 
 export default function App(props) {
+  // Disable Font Scaling
+  Text.defaultProps = Text.defaultProps || {};
+  Text.defaultProps.allowFontScaling = false;
+
+  TextInput.defaultProps = TextInput.defaultProps || {};
+  TextInput.defaultProps.allowFontScaling = false;
+
   // const [isLoadingComplete, setLoadingComplete] = React.useState(false);
   // const [showOnboarding, setShowOnboarding] = React.useState(true);
   // const [preferences, setPreferences] = React.useState<
