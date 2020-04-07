@@ -19,7 +19,7 @@ const slides = [
   {
     key: 'slide2',
     text:
-      'Si presentás síntomas o creés haber estado en contacto con alguien infectado, CoTrack te puede ayudar a realizar un diagnóstico y aconsejarte qué hacer según el resultado',
+      'Si presentás síntomas o creés haber estado en contacto con alguien infectado, CoTrack te puede ayudar a realizar un evaluación y aconsejarte qué hacer según el resultado',
     image: require('../../assets/images/prevention/fever.png'),
     backgroundColor: '#fff',
   },
@@ -83,7 +83,7 @@ export const OnboardingSlides = ({ navigation }: MainStackNavProps<'Help'>) => {
       activeDotStyle={styles.activeDot}
       slides={slides}
       onLoad={pageHit(`Slide1`)}
-      onSlideChange={index => {
+      onSlideChange={(index) => {
         pageHit(`Slide${index}`);
       }}
       onDone={handleDone}

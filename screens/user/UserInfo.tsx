@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   Modal,
   TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
@@ -54,11 +55,11 @@ const UserInfo = ({ navigation }: MainStackNavProps<'UserInfo'>) => {
     loadData();
   }, []);
 
-  const handleChange = key => value => {
+  const handleChange = (key) => (value) => {
     setState({ [key]: value });
   };
 
-  const handleOpenLink = url => {
+  const handleOpenLink = (url) => {
     if (Platform.OS === 'web') {
       window.open(url, '_blank');
     } else {
@@ -199,14 +200,14 @@ const UserInfo = ({ navigation }: MainStackNavProps<'UserInfo'>) => {
             resizeMode="contain"
           />
           <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             style={{
               flex: 1,
               justifyContent: 'flex-start',
             }}
           >
             <Text style={styles.text}>
-              Necesitamos algunos datos tuyos para poder realizar un diagnóstico
+              Necesitamos algunos datos tuyos para poder realizar un evaluación
               más preciso y contactarte si necesitas ayuda.
             </Text>
 
@@ -215,6 +216,27 @@ const UserInfo = ({ navigation }: MainStackNavProps<'UserInfo'>) => {
               onChange={handleChange('province')}
               value={state.province}
             />
+
+            {state.province && state.province.image ? (
+              <View
+                style={{
+                  alignItems: 'center',
+                }}
+              >
+                <Image
+                  source={state.province.image}
+                  style={{
+                    height: 100,
+                    width: 100,
+                    marginTop: 10,
+                  }}
+                  resizeMode="contain"
+                />
+                <Text style={{ textAlign: 'center', marginTop: 5 }}>
+                  App Oficial
+                </Text>
+              </View>
+            ) : null}
 
             <TextInput
               placeholder="DNI"
@@ -277,12 +299,14 @@ const UserInfo = ({ navigation }: MainStackNavProps<'UserInfo'>) => {
               ¿Por qué pedimos estos datos?
             </Text>
 
-            <View style={{ flexDirection: 'row', marginTop: 20 }}>
+            <View
+              style={{ flexDirection: 'row', marginTop: 20, marginBottom: 20 }}
+            >
               <CheckBox
                 value={state.terms}
                 onValueChange={handleChange('terms')}
               />
-              <Text style={{ marginTop: 0, marginBottom: 20 }}>
+              <Text style={{ marginTop: Platform.OS === 'web' ? 0 : 5 }}>
                 {' '}
                 He leído y acepto los{' '}
                 <Text
@@ -337,6 +361,7 @@ const styles = StyleSheet.create({
   logo: {
     width: 150,
     height: 100,
+    marginHorizontal: 'auto',
   },
   text: {
     fontSize: 14,
