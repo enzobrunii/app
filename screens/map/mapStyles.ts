@@ -2,15 +2,24 @@ import { StyleSheet } from 'react-native';
 
 export const panelStyles = StyleSheet.create({
   panel: {
-    padding: 20,
-    backgroundColor: '#f7f5eee8',
+    padding: 25
   },
-  header: {
-    backgroundColor: '#f7f5eee8',
-    shadowColor: '#000000',
-    paddingTop: 20,
+  barContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: 'white',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    paddingBottom: 10
+  },
+  bar: {
+    width: "40%",
+    height: 6,
+    borderRadius: 5,
+    marginTop: 10,
+    marginBottom: 10,
+    backgroundColor: "#e2e2e2"
   },
   panelHeader: {
     alignItems: 'center',
@@ -91,6 +100,7 @@ export const mapStyles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'flex-end',
     alignItems: 'flex-end',
+    marginTop: 15
   },
   modalContent: {
     width: '90%',

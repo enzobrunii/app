@@ -4,12 +4,13 @@ import {
   Text,
   View,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   SafeAreaView,
-  Modal,
+  Modal
 } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import MapView, { PROVIDER_GOOGLE, Heatmap } from 'react-native-maps';
-import BottomSheet from 'reanimated-bottom-sheet';
+import SwipeablePanel from 'rn-swipeable-panel';
 import { getHeatmapData, getHeatmapSocialData } from '../../api/services';
 
 import { useLocation } from '../../hooks/use-location';
@@ -57,12 +58,14 @@ function PanelContent() {
   );
 }
 
-function PanelHeader() {
+function PanelHeader(props) {
   return (
-    <View style={panelStyles.header}>
-      <View style={panelStyles.panelHeader}>
-        <View style={panelStyles.panelHandle} />
-      </View>
+    <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+      <TouchableWithoutFeedback {...props}>
+        <View style={panelStyles.barContainer}>
+          <View style={panelStyles.bar} />
+        </View>
+      </TouchableWithoutFeedback>
     </View>
   );
 }
@@ -72,11 +75,10 @@ export default function Map({ navigation }) {
   const [mapReady, setMapReady] = useState(false);
   const [heatmapData, setHeatmapData] = useState(heatmapInitialValues);
   const [heatmapDataAux, setHeatmapDataAux] = useState(heatmapInitialValues);
-
+  const [bottomPanel, setBottomPanel] = useState(true);
   const [isVisibleModalSocial, setIsVisibleModalSocial] = useState(false);
 
   const mapRef = useRef<MapView>();
-  const refRBSheet = useRef();
 
   useEffect(() => {
     if (location) {
@@ -143,7 +145,7 @@ export default function Map({ navigation }) {
   }, [location]);
 
   return (
-    <View style={[mapStyles.container]}>
+    <SafeAreaView style={[mapStyles.container]}>
       <MapView
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
@@ -179,7 +181,7 @@ export default function Map({ navigation }) {
         ) : null}
       </MapView>
 
-      <SafeAreaView style={[mapStyles.buttonContainer]}>
+      <View style={mapStyles.buttonContainer}>
         <TouchableOpacity
           activeOpacity={0.8}
           style={[mapStyles.button, mapStyles.locationButton]}
@@ -234,48 +236,47 @@ export default function Map({ navigation }) {
             color={!location ? Colors.tabIconDefault : 'rgba(66, 135, 244, 1)'}
           />
         </TouchableOpacity>
-      </SafeAreaView>
-      {mapReady && (
-        <BottomSheet
-          ref={refRBSheet}
-          snapPoints={['40%', 150, 50]}
-          renderContent={PanelContent}
-          renderHeader={PanelHeader}
-          initialSnap={1}
-        />
-      )}
-      <View style={{ marginTop: 22 }}>
-        <Modal
-          animationType="slide"
-          transparent={true}
-          presentationStyle="overFullScreen"
-          visible={isVisibleModalSocial}
-        >
-          <View style={{ marginTop: 22, width: '100%' }}>
-            <Text style={mapStyles.modalTitle}>Datos Comunitarios</Text>
-            <Text
-              style={[
-                mapStyles.modalBody,
-                {
-                  borderRightWidth: 0,
-                  borderLeftWidth: 0,
-                  borderWidth: 0,
-                },
-              ]}
-            >
-              Los datos que estarás viendo ahora son datos reportados
-              voluntariamente. No son datos oficiales!
-            </Text>
-            <View style={{ backgroundColor: 'white' }}>
-              <TouchableOpacity onPress={() => setIsVisibleModalSocial(false)}>
-                <View style={mapStyles.modalButton}>
-                  <Text style={{ color: 'white' }}>Aceptar</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
       </View>
-    </View>
+      <PanelHeader onPress={() => setBottomPanel(true)} />
+      <SwipeablePanel
+        isActive={bottomPanel}
+        onClose={() => setBottomPanel(false)}
+        onPressCloseButton={() => setBottomPanel(false)}
+        showCloseButton
+        >
+  			<PanelContent />
+  		</SwipeablePanel>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        presentationStyle="overFullScreen"
+        visible={isVisibleModalSocial}
+      >
+        <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', margin: 20 }}>
+          <Text style={mapStyles.modalTitle}>Datos Comunitarios</Text>
+          <Text
+            style={[
+              mapStyles.modalBody,
+              {
+                borderRightWidth: 0,
+                borderLeftWidth: 0,
+                borderWidth: 0,
+                textAlign: 'center'
+              },
+            ]}
+          >
+            Los datos que estarás viendo ahora son datos reportados
+            voluntariamente. No son datos oficiales!
+          </Text>
+          <View style={{ backgroundColor: 'white' }}>
+            <TouchableOpacity onPress={() => setIsVisibleModalSocial(false)}>
+              <View style={mapStyles.modalButton}>
+                <Text style={{ color: 'white' }}>Aceptar</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
   );
 }
